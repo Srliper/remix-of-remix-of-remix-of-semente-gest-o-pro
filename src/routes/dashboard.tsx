@@ -72,7 +72,7 @@ const dayLabel = (d: Date) =>
   d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
 
 function DashboardPage() {
-  const { isAdmin, categories } = useApp();
+  const { isAdmin, categories, currentUser } = useApp();
   const sales = useVisibleSales();
   const products = useVisibleProducts();
   const [period, setPeriod] = useState<Period>("mes");
@@ -166,6 +166,7 @@ function DashboardPage() {
       value: brl(salesToday.reduce((a, s) => a + s.total_amount, 0)),
       hint: `${salesToday.length} venda(s) hoje`,
       icon: DollarSign,
+      accent: "bg-gold/10 text-gold",
     },
     ...(isAdmin
       ? [
@@ -174,6 +175,7 @@ function DashboardPage() {
             value: brl(monthProfit),
             hint: "Venda menos custo das peças",
             icon: TrendingUp,
+            accent: "bg-success/10 text-success",
           },
         ]
       : []),
@@ -182,18 +184,20 @@ function DashboardPage() {
       value: brl(stockValue),
       hint: `${stockUnits} peças disponíveis`,
       icon: Boxes,
+      accent: "bg-primary/10 text-primary",
     },
     {
       label: "Produtos vendidos no mês",
       value: String(monthItems),
       hint: `${monthSales.length} vendas no mês`,
       icon: PackageCheck,
+      accent: "bg-secondary/10 text-secondary",
     },
   ];
 
   return (
     <AppShell
-      title={`Olá, ${useApp().currentUser?.name.split(" ")[0]}!`}
+      title={`Olá, ${currentUser?.name.split(" ")[0]}!`}
       subtitle="Panorama das unidades Retiro e São Miguel Arcanjo."
       actions={
         <div className="flex flex-wrap items-center gap-2">
@@ -237,16 +241,19 @@ function DashboardPage() {
         </div>
       }
     >
+      {/* Bento metric cards */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (
-          <Card key={card.label} className="shadow-soft">
+          <Card key={card.label} className="shadow-soft transition-shadow hover:shadow-card">
             <CardContent className="flex items-start justify-between gap-3 py-5">
               <div>
                 <p className="text-sm text-muted-foreground">{card.label}</p>
                 <p className="mt-1 font-display text-2xl font-semibold">{card.value}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{card.hint}</p>
               </div>
-              <div className="flex size-10 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+              <div
+                className={`flex size-10 items-center justify-center rounded-xl ${card.accent}`}
+              >
                 <card.icon className="size-5" />
               </div>
             </CardContent>
@@ -254,10 +261,13 @@ function DashboardPage() {
         ))}
       </div>
 
+      {/* Bento charts row */}
       <div className="mt-5 grid gap-4 lg:grid-cols-3">
         <Card className="shadow-soft lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-base">Vendas por unidade — últimos 7 dias</CardTitle>
+            <CardTitle className="font-display text-base">
+              Vendas por unidade — últimos 7 dias
+            </CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -276,7 +286,7 @@ function DashboardPage() {
 
         <Card className="shadow-soft">
           <CardHeader>
-            <CardTitle className="text-base">Vendas por categoria</CardTitle>
+            <CardTitle className="font-display text-base">Vendas por categoria</CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -301,84 +311,87 @@ function DashboardPage() {
         </Card>
       </div>
 
-      <Card className="mt-5 shadow-soft">
-        <CardHeader>
-          <CardTitle className="text-base">Evolução de vendas — últimos 30 dias</CardTitle>
-        </CardHeader>
-        <CardContent className="h-[280px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={last30}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="dia" fontSize={11} tickLine={false} axisLine={false} interval={3} />
-              <YAxis fontSize={12} tickLine={false} axisLine={false} />
-              <Tooltip formatter={(v: number) => brl(v)} />
-              <Line
-                type="monotone"
-                dataKey="total"
-                stroke="var(--chart-2)"
-                strokeWidth={2.5}
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+      {/* Bento trend + recent sales */}
+      <div className="mt-5 grid gap-4 lg:grid-cols-3">
+        <Card className="shadow-soft">
+          <CardHeader>
+            <CardTitle className="font-display text-base">Evolução — 30 dias</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[280px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={last30}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <XAxis dataKey="dia" fontSize={11} tickLine={false} axisLine={false} interval={3} />
+                <YAxis fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip formatter={(v: number) => brl(v)} />
+                <Line
+                  type="monotone"
+                  dataKey="total"
+                  stroke="var(--chart-2)"
+                  strokeWidth={2.5}
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
-      <Card className="mt-5 shadow-soft">
-        <CardHeader>
-          <CardTitle className="text-base">Últimas 10 vendas</CardTitle>
-        </CardHeader>
-        <CardContent className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Data</TableHead>
-                <TableHead>Hora</TableHead>
-                <TableHead>Vendedor</TableHead>
-                <TableHead>Unidade</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead className="text-right">Valor</TableHead>
-                {isAdmin && <TableHead className="text-right">Lucro</TableHead>}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.slice(0, 10).map((s) => {
-                const d = new Date(s.created_at);
-                return (
-                  <TableRow key={s.id}>
-                    <TableCell>{d.toLocaleDateString("pt-BR")}</TableCell>
-                    <TableCell>
-                      {d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                    </TableCell>
-                    <TableCell className="font-medium">{s.user_name}</TableCell>
-                    <TableCell>{STORE_LABEL[s.store_location]}</TableCell>
-                    <TableCell>
-                      <Badge variant={s.sale_type === "delivery" ? "secondary" : "outline"}>
-                        {s.sale_type === "delivery" ? "Delivery" : "Balcão"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {brl(s.total_amount)}
-                    </TableCell>
-                    {isAdmin && (
-                      <TableCell className="text-right text-success">
-                        {brl(s.total_profit ?? 0)}
-                      </TableCell>
-                    )}
-                  </TableRow>
-                );
-              })}
-              {!filtered.length && (
+        <Card className="shadow-soft lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="font-display text-base">Últimas 10 vendas</CardTitle>
+          </CardHeader>
+          <CardContent className="overflow-x-auto">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
-                    Nenhuma venda no período selecionado.
-                  </TableCell>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Hora</TableHead>
+                  <TableHead>Vendedor</TableHead>
+                  <TableHead>Unidade</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead className="text-right">Valor</TableHead>
+                  {isAdmin && <TableHead className="text-right">Lucro</TableHead>}
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              </TableHeader>
+              <TableBody>
+                {filtered.slice(0, 10).map((s) => {
+                  const d = new Date(s.created_at);
+                  return (
+                    <TableRow key={s.id}>
+                      <TableCell>{d.toLocaleDateString("pt-BR")}</TableCell>
+                      <TableCell>
+                        {d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                      </TableCell>
+                      <TableCell className="font-medium">{s.user_name}</TableCell>
+                      <TableCell>{STORE_LABEL[s.store_location]}</TableCell>
+                      <TableCell>
+                        <Badge variant={s.sale_type === "delivery" ? "secondary" : "outline"}>
+                          {s.sale_type === "delivery" ? "Delivery" : "Balcão"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        {brl(s.total_amount)}
+                      </TableCell>
+                      {isAdmin && (
+                        <TableCell className="text-right text-success">
+                          {brl(s.total_profit ?? 0)}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
+                {!filtered.length && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                      Nenhuma venda no período selecionado.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
     </AppShell>
   );
 }
