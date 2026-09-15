@@ -12,7 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as DeliveryRouteImport } from './routes/delivery'
 import { Route as EquipeRouteImport } from './routes/equipe'
+import { Route as LojaRouteImport } from './routes/loja'
+import { Route as LojaFisicaRouteImport } from './routes/loja-fisica'
 import { Route as PdvRouteImport } from './routes/pdv'
 import { Route as ProdutosRouteImport } from './routes/produtos'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
@@ -32,9 +35,24 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DeliveryRoute = DeliveryRouteImport.update({
+  id: '/delivery',
+  path: '/delivery',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EquipeRoute = EquipeRouteImport.update({
   id: '/equipe',
   path: '/equipe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LojaRoute = LojaRouteImport.update({
+  id: '/loja',
+  path: '/loja',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LojaFisicaRoute = LojaFisicaRouteImport.update({
+  id: '/loja-fisica',
+  path: '/loja-fisica',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PdvRoute = PdvRouteImport.update({
@@ -57,7 +75,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/dashboard': typeof DashboardRoute
+  '/delivery': typeof DeliveryRoute
   '/equipe': typeof EquipeRoute
+  '/loja': typeof LojaRoute
+  '/loja-fisica': typeof LojaFisicaRoute
   '/pdv': typeof PdvRoute
   '/produtos': typeof ProdutosRoute
   '/relatorios': typeof RelatoriosRoute
@@ -66,7 +87,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/dashboard': typeof DashboardRoute
+  '/delivery': typeof DeliveryRoute
   '/equipe': typeof EquipeRoute
+  '/loja': typeof LojaRoute
+  '/loja-fisica': typeof LojaFisicaRoute
   '/pdv': typeof PdvRoute
   '/produtos': typeof ProdutosRoute
   '/relatorios': typeof RelatoriosRoute
@@ -76,7 +100,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/dashboard': typeof DashboardRoute
+  '/delivery': typeof DeliveryRoute
   '/equipe': typeof EquipeRoute
+  '/loja': typeof LojaRoute
+  '/loja-fisica': typeof LojaFisicaRoute
   '/pdv': typeof PdvRoute
   '/produtos': typeof ProdutosRoute
   '/relatorios': typeof RelatoriosRoute
@@ -87,7 +114,10 @@ export interface FileRouteTypes {
     | '/'
     | '/configuracoes'
     | '/dashboard'
+    | '/delivery'
     | '/equipe'
+    | '/loja'
+    | '/loja-fisica'
     | '/pdv'
     | '/produtos'
     | '/relatorios'
@@ -96,7 +126,10 @@ export interface FileRouteTypes {
     | '/'
     | '/configuracoes'
     | '/dashboard'
+    | '/delivery'
     | '/equipe'
+    | '/loja'
+    | '/loja-fisica'
     | '/pdv'
     | '/produtos'
     | '/relatorios'
@@ -105,7 +138,10 @@ export interface FileRouteTypes {
     | '/'
     | '/configuracoes'
     | '/dashboard'
+    | '/delivery'
     | '/equipe'
+    | '/loja'
+    | '/loja-fisica'
     | '/pdv'
     | '/produtos'
     | '/relatorios'
@@ -115,7 +151,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
   DashboardRoute: typeof DashboardRoute
+  DeliveryRoute: typeof DeliveryRoute
   EquipeRoute: typeof EquipeRoute
+  LojaRoute: typeof LojaRoute
+  LojaFisicaRoute: typeof LojaFisicaRoute
   PdvRoute: typeof PdvRoute
   ProdutosRoute: typeof ProdutosRoute
   RelatoriosRoute: typeof RelatoriosRoute
@@ -144,11 +183,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/delivery': {
+      id: '/delivery'
+      path: '/delivery'
+      fullPath: '/delivery'
+      preLoaderRoute: typeof DeliveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/equipe': {
       id: '/equipe'
       path: '/equipe'
       fullPath: '/equipe'
       preLoaderRoute: typeof EquipeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/loja': {
+      id: '/loja'
+      path: '/loja'
+      fullPath: '/loja'
+      preLoaderRoute: typeof LojaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/loja-fisica': {
+      id: '/loja-fisica'
+      path: '/loja-fisica'
+      fullPath: '/loja-fisica'
+      preLoaderRoute: typeof LojaFisicaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pdv': {
@@ -179,7 +239,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
   DashboardRoute: DashboardRoute,
+  DeliveryRoute: DeliveryRoute,
   EquipeRoute: EquipeRoute,
+  LojaRoute: LojaRoute,
+  LojaFisicaRoute: LojaFisicaRoute,
   PdvRoute: PdvRoute,
   ProdutosRoute: ProdutosRoute,
   RelatoriosRoute: RelatoriosRoute,
