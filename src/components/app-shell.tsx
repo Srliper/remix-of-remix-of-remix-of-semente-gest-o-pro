@@ -2,6 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   BarChart3,
   Boxes,
+  Bike,
   LayoutDashboard,
   LogOut,
   Moon,
@@ -9,6 +10,7 @@ import {
   Settings,
   ShoppingCart,
   Sprout,
+  Store,
   Sun,
   Users,
 } from "lucide-react";
@@ -36,13 +38,28 @@ import { useApp } from "@/lib/store";
 import { STORE_LABEL } from "@/lib/types";
 import { GlobalSearch } from "@/components/global-search";
 
-const NAV = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, adminOnly: false },
-  { title: "Estoque & Produtos", url: "/produtos", icon: Boxes, adminOnly: false },
-  { title: "PDV — Vendas", url: "/pdv", icon: ShoppingCart, adminOnly: false },
-  { title: "Relatórios", url: "/relatorios", icon: BarChart3, adminOnly: false },
-  { title: "Equipe", url: "/equipe", icon: Users, adminOnly: true },
-  { title: "Configurações", url: "/configuracoes", icon: Settings, adminOnly: true },
+const NAV_GROUPS = [
+  {
+    label: "Visão geral",
+    items: [{ title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, adminOnly: false }],
+  },
+  {
+    label: "Operação",
+    items: [
+      { title: "Loja física", url: "/loja-fisica", icon: Store, adminOnly: false },
+      { title: "Delivery", url: "/delivery", icon: Bike, adminOnly: false },
+      { title: "PDV — Vendas", url: "/pdv", icon: ShoppingCart, adminOnly: false },
+    ],
+  },
+  {
+    label: "Gestão",
+    items: [
+      { title: "Produtos & Estoque", url: "/produtos", icon: Boxes, adminOnly: false },
+      { title: "Relatórios", url: "/relatorios", icon: BarChart3, adminOnly: false },
+      { title: "Equipe", url: "/equipe", icon: Users, adminOnly: true },
+      { title: "Configurações", url: "/configuracoes", icon: Settings, adminOnly: true },
+    ],
+  },
 ] as const;
 
 function AppSidebar() {
@@ -51,8 +68,6 @@ function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (r) => r.location.pathname });
-
-  const items = NAV.filter((item) => !item.adminOnly || isAdmin);
 
   return (
     <Sidebar collapsible="icon">
@@ -71,23 +86,28 @@ function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Navegação</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
-                    <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon className="size-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {NAV_GROUPS.map((group) => {
+          const items = group.items.filter((item) => !item.adminOnly || isAdmin);
+          return (
+            <SidebarGroup key={group.label}>
+              <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {items.map((item) => (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
+                        <Link to={item.url} className="flex items-center gap-2">
+                          <item.icon className="size-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          );
+        })}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
