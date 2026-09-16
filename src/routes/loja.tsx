@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ChevronLeft, MapPin, Minus, Plus, Search, ShoppingBag, Sprout, Trash2, Truck } from "lucide-react";
+import { Check, ChevronLeft, MapPin, Minus, Plus, Search, ShoppingBag, Sprout, Store as StoreIcon, Trash2, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,12 +48,14 @@ const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u0
 const imageForCategory = (name: string) => CATEGORY_CHOICES.find((choice) => normalize(name).includes(normalize(choice.key)))?.image ?? acessorios;
 
 type Cart = Record<string, number>;
+type ShoppingMode = "delivery" | "loja";
 
 function StorefrontPage() {
   const { categories, createSale, currentUser, loading } = useApp();
   const products = useVisibleProducts();
   const [category, setCategory] = useState("todas");
   const [store, setStore] = useState<"todas" | Store>("todas");
+  const [mode, setMode] = useState<ShoppingMode>("delivery");
   const [search, setSearch] = useState("");
   const [cart, setCart] = useState<Cart>({});
   const [cartOpen, setCartOpen] = useState(false);
@@ -131,7 +133,7 @@ function StorefrontPage() {
           </Link>
           <div className="ml-auto flex items-center gap-2">
             <Button variant="ghost" asChild className="hidden sm:inline-flex"><Link to="/"><ChevronLeft />Área da equipe</Link></Button>
-            <Button onClick={() => setCartOpen(true)}><ShoppingBag />Sacola <Badge className="bg-primary-foreground text-primary">{totalItems}</Badge></Button>
+            {mode === "delivery" && <Button onClick={() => setCartOpen(true)}><ShoppingBag />Sacola <Badge className="bg-primary-foreground text-primary">{totalItems}</Badge></Button>}
           </div>
         </div>
       </header>
@@ -140,13 +142,41 @@ function StorefrontPage() {
         <section className="border-b bg-primary text-primary-foreground">
           <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:py-14">
             <div>
-              <Badge className="mb-4 bg-gold text-gold-foreground"><Truck className="size-3.5" /> Delivery das duas unidades</Badge>
-              <h1 className="max-w-2xl font-display text-3xl font-bold leading-tight sm:text-5xl">Peças únicas para uma nova história.</h1>
-              <p className="mt-4 max-w-xl text-primary-foreground/80">Escolha sua categoria, monte a sacola e receba sua seleção onde estiver.</p>
+              <Badge className="mb-4 bg-gold text-gold-foreground">{mode === "delivery" ? <Truck className="size-3.5" /> : <StoreIcon className="size-3.5" />} {mode === "delivery" ? "Entrega das duas unidades" : "Compra presencial"}</Badge>
+              <h1 className="max-w-2xl font-display text-3xl font-bold leading-tight sm:text-5xl">{mode === "delivery" ? "Peças únicas entregues até você." : "Escolha antes de visitar a loja."}</h1>
+              <p className="mt-4 max-w-xl text-primary-foreground/80">{mode === "delivery" ? "Escolha sua categoria, monte a sacola e receba sua seleção onde estiver." : "Veja as peças por categoria, escolha a unidade e encontre seus favoritos pessoalmente."}</p>
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="border-l border-primary-foreground/30 pl-4"><strong className="block font-display text-2xl">2</strong>unidades para escolher</div>
               <div className="border-l border-primary-foreground/30 pl-4"><strong className="block font-display text-2xl">{products.filter((p) => p.status === "disponivel").length}</strong>peças disponíveis</div>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b bg-card">
+          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+            <p className="mb-3 text-xs font-semibold uppercase text-secondary">Como você quer comprar?</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Button
+                type="button"
+                variant={mode === "delivery" ? "default" : "outline"}
+                className="h-auto justify-start gap-4 px-4 py-4 text-left"
+                onClick={() => setMode("delivery")}
+              >
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-md bg-primary-foreground/15"><Truck className="size-5" /></span>
+                <span className="min-w-0 flex-1"><strong className="block font-display text-base">Receber por delivery</strong><span className="block whitespace-normal text-xs opacity-80">Monte a sacola e informe o endereço de entrega.</span></span>
+                {mode === "delivery" && <Check className="size-5 shrink-0" />}
+              </Button>
+              <Button
+                type="button"
+                variant={mode === "loja" ? "default" : "outline"}
+                className="h-auto justify-start gap-4 px-4 py-4 text-left"
+                onClick={() => setMode("loja")}
+              >
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-md bg-primary-foreground/15"><StoreIcon className="size-5" /></span>
+                <span className="min-w-0 flex-1"><strong className="block font-display text-base">Ver e comprar na loja</strong><span className="block whitespace-normal text-xs opacity-80">Escolha uma unidade e veja o que está disponível.</span></span>
+                {mode === "loja" && <Check className="size-5 shrink-0" />}
+              </Button>
             </div>
           </div>
         </section>
@@ -179,7 +209,7 @@ function StorefrontPage() {
               const categoryName = categories.find((item) => item.id === product.category_id)?.name ?? "Acessórios";
               return <Card key={product.id} className="overflow-hidden shadow-soft transition hover:shadow-card">
                 <div className="aspect-[4/3] overflow-hidden bg-accent"><img src={product.image_url || imageForCategory(categoryName)} alt={product.name} loading="lazy" className="h-full w-full object-cover transition duration-500 hover:scale-105" /></div>
-                <CardContent className="space-y-3 py-4"><div><Badge variant="outline">{categoryName}</Badge><h3 className="mt-2 line-clamp-1 font-display text-lg font-bold">{product.name}</h3><p className="mt-1 line-clamp-2 min-h-10 text-sm text-muted-foreground">{product.description || `Peça disponível na unidade ${STORE_LABEL[product.store_location]}.`}</p></div><div className="flex items-end justify-between"><div><p className="font-display text-xl font-bold text-secondary">{brl(product.sell_price)}</p><p className="text-xs text-muted-foreground">{STORE_LABEL[product.store_location]} · {product.stock_qty} un.</p></div><Button size="icon" aria-label={`Adicionar ${product.name}`} onClick={() => setQuantity(product, (cart[product.id] ?? 0) + 1)}><Plus /></Button></div></CardContent>
+                <CardContent className="space-y-3 py-4"><div><Badge variant="outline">{categoryName}</Badge><h3 className="mt-2 line-clamp-1 font-display text-lg font-bold">{product.name}</h3><p className="mt-1 line-clamp-2 min-h-10 text-sm text-muted-foreground">{product.description || `Peça disponível na unidade ${STORE_LABEL[product.store_location]}.`}</p></div><div className="flex items-end justify-between gap-3"><div><p className="font-display text-xl font-bold text-secondary">{brl(product.sell_price)}</p><p className="text-xs text-muted-foreground">{STORE_LABEL[product.store_location]} · {product.stock_qty} un.</p></div>{mode === "delivery" ? <Button size="icon" aria-label={`Adicionar ${product.name}`} onClick={() => setQuantity(product, (cart[product.id] ?? 0) + 1)}><Plus /></Button> : <Badge className="shrink-0"><StoreIcon className="size-3" /> Na loja</Badge>}</div></CardContent>
               </Card>;
             })}
           </div> : <div className="border-y py-16 text-center"><ShoppingBag className="mx-auto size-8 text-muted-foreground" /><p className="mt-3 font-medium">Nenhuma peça encontrada.</p><Button variant="link" onClick={() => { setCategory("todas"); setSearch(""); setStore("todas"); }}>Limpar escolhas</Button></div>}
