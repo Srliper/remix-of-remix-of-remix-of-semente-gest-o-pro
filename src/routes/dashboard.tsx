@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
   Bar,
@@ -15,7 +15,7 @@ import {
   YAxis,
   Legend,
 } from "recharts";
-import { Boxes, DollarSign, PackageCheck, TrendingUp } from "lucide-react";
+import { ArrowRight, Boxes, DollarSign, PackageCheck, ShoppingBag, TrendingUp } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,8 +35,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useApp, useVisibleProducts, useVisibleSales } from "@/lib/store";
 import { brl, STORE_LABEL } from "@/lib/types";
+import adminGestor from "@/assets/icons/admin-gestor.png";
+import deliveryMoto from "@/assets/icons/delivery-moto.png";
+import adminEscudo from "@/assets/icons/admin-escudo.png";
 
 export const Route = createFileRoute("/dashboard")({
   ssr: false,
@@ -260,6 +264,47 @@ function DashboardPage() {
           </Card>
         ))}
       </div>
+
+      <section className="mt-5">
+        <div className="mb-3 flex items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase text-secondary">Áreas da empresa</p>
+            <h2 className="mt-1 font-display text-xl font-semibold">Escolha onde deseja trabalhar</h2>
+          </div>
+          <Button variant="ghost" asChild className="hidden sm:inline-flex">
+            <Link to="/loja" target="_blank">Ver loja do cliente <ArrowRight /></Link>
+          </Button>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card className="group relative overflow-hidden border-primary/20 shadow-soft transition hover:-translate-y-0.5 hover:shadow-card">
+            <img src={adminGestor} alt="" className="absolute -bottom-7 -right-4 size-36 object-contain opacity-15 transition group-hover:opacity-25" />
+            <CardContent className="relative flex min-h-44 flex-col items-start py-5">
+              <Badge variant="outline">Operação presencial</Badge>
+              <h3 className="mt-4 font-display text-xl font-bold">Gestão da loja física</h3>
+              <p className="mt-1 max-w-64 text-sm text-muted-foreground">Vendas de balcão, estoque e desempenho de cada unidade.</p>
+              <Button asChild className="mt-auto"><Link to="/loja-fisica">Acessar loja física <ArrowRight /></Link></Button>
+            </CardContent>
+          </Card>
+          <Card className="group relative overflow-hidden border-secondary/30 shadow-soft transition hover:-translate-y-0.5 hover:shadow-card">
+            <img src={deliveryMoto} alt="" className="absolute -bottom-5 -right-3 size-36 object-contain opacity-20 transition group-hover:opacity-30" />
+            <CardContent className="relative flex min-h-44 flex-col items-start py-5">
+              <Badge variant="secondary">Pedidos e entregas</Badge>
+              <h3 className="mt-4 font-display text-xl font-bold">Gestão do delivery</h3>
+              <p className="mt-1 max-w-64 text-sm text-muted-foreground">Acompanhe pedidos do recebimento até a entrega concluída.</p>
+              <Button asChild className="mt-auto"><Link to="/delivery">Acessar delivery <ArrowRight /></Link></Button>
+            </CardContent>
+          </Card>
+          <Card className="group relative overflow-hidden border-gold/30 shadow-soft transition hover:-translate-y-0.5 hover:shadow-card">
+            <img src={adminEscudo} alt="" className="absolute -bottom-7 -right-4 size-36 object-contain opacity-15 transition group-hover:opacity-25" />
+            <CardContent className="relative flex min-h-44 flex-col items-start py-5">
+              <Badge className="bg-gold text-gold-foreground">Catálogo e estoque</Badge>
+              <h3 className="mt-4 font-display text-xl font-bold">Produtos e classes</h3>
+              <p className="mt-1 max-w-64 text-sm text-muted-foreground">Cadastre peças, organize categorias e controle disponibilidades.</p>
+              <Button asChild className="mt-auto"><Link to="/produtos"><ShoppingBag />Gerenciar produtos</Link></Button>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
 
       {/* Bento charts row */}
       <div className="mt-5 grid gap-4 lg:grid-cols-3">
